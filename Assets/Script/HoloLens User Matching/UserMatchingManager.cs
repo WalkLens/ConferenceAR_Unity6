@@ -501,20 +501,20 @@ public class UserMatchingManager : HostOnlyBehaviour
     {
         // "Mobile"을 "hololens"로 변경
         string changedName = partnerUserName.Replace("Mobile", "hololens");
-        FileLogger.Log("changedName:  "+changedName, this);
-        changedName = partnerUserName.Replace("CentralHost", "");
+        FileLogger.Log("changedName:  " + changedName, this);
+        changedName = changedName.Replace("CentralHost", "");
         FileLogger.Log("changedName:  " + changedName, this);
         partnerGameObject = FindObjectsOfType<GameObject>()
-            .FirstOrDefault(obj => obj.name.StartsWith(changedName) || obj.name == changedName);
-        
+            .FirstOrDefault(obj => obj.name.StartsWith(changedName) && obj.name == changedName);
+
         // 여전히 null이라면 디버그 로그 출력
         if (partnerGameObject == null)
         {
             FileLogger.Log($"GameObject not found: {partnerGameObject.name}");
-            partnerUserInfo.PhotonUserName = partnerGameObject.name;
         }
         else
         {
+            partnerUserInfo.PhotonUserName = partnerGameObject.name;
             FileLogger.Log($"Found partnerGameObject: {partnerGameObject.name}");
         }
     }
