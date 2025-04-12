@@ -86,7 +86,7 @@ public class HololenUIManager : MonoBehaviour
         // �ð� ����
         currentTime.text = DateTime.Now.ToString(("hh:mm tt"));
 
-        LoadReservatedDataUpdate();
+        ReservatedDataUpdate();
 
         // DB ����
         if (isTimerUpdated)
@@ -144,7 +144,7 @@ public class HololenUIManager : MonoBehaviour
         // TODO : �̹���, ���� ���µ� �ε� �ʿ�
     }
 
-    public void LoadReservatedDataUpdate()
+    public void ReservatedDataUpdate()
     {
         //List<string> keys = new List<string>(timers.Keys); // ����� �����鿡 ���ؼ� Ÿ�̸� �۵�
 
@@ -161,6 +161,8 @@ public class HololenUIManager : MonoBehaviour
                     DateTime.Now.AddSeconds(data.time)
                         .ToString("hh:mm tt"); // !!! ��� ������ �ʿ� �����Ƿ� ���Ŀ� ������ ������
                 ReservatedDataCircleTimer.fillAmount = data.time / (4 * 60 * 60);
+
+                UserMatchingManager.Instance.matchedUserData[i] = data;
             }
             else if (data.time >= 60)
             {
@@ -170,6 +172,8 @@ public class HololenUIManager : MonoBehaviour
                     DateTime.Now.AddSeconds(data.time)
                         .ToString("hh:mm tt"); // !!! ��� ������ �ʿ� �����Ƿ� ���Ŀ� ������ ������
                 ReservatedDataCircleTimer.fillAmount = data.time / (4 * 60 * 60);
+
+                UserMatchingManager.Instance.matchedUserData[i] = data;
             }
             else if (data.time >= 0)
             {
@@ -179,20 +183,25 @@ public class HololenUIManager : MonoBehaviour
                     DateTime.Now.AddSeconds(data.time)
                         .ToString("hh:mm tt"); // !!! ��� ������ �ʿ� �����Ƿ� ���Ŀ� ������ ������
                 ReservatedDataCircleTimer.fillAmount = data.time / (4 * 60 * 60);
+
+                UserMatchingManager.Instance.matchedUserData[i] = data;
             }
             else
             {
                 if (data.time != -1)
                 {
-                    data.time = -1; // �ٸ� �������� �´� ���� �߰� �ؾ���
+                    data.time = -1; // 한번만 작동하도록
                     hmdUIEvent.OpenMatchingStartPopupUI();
-                    RemoveReservedData();
+                    //RemoveReservedData();
+                    RemoveReservedData2(data.pin);
                 }
 
                 ReservatedDataText[1].text =
                     DateTime.Now.AddSeconds(data.time)
                         .ToString("hh:mm tt"); // !!! ��� ������ �ʿ� �����Ƿ� ���Ŀ� ������ ������
                 ReservatedDataCircleTimer.fillAmount = data.time / (4 * 60 * 60);
+
+                UserMatchingManager.Instance.matchedUserData[i] = data;
             }
         }
     }
@@ -213,13 +222,16 @@ public class HololenUIManager : MonoBehaviour
     /// </summary>
     public void AddMatchingRequestData() // !!! ����� ���� ����� �κ�
     {
+        string partnerPin = UserMatchingManager.Instance.GetPartnerUserPinNumber();
+
         GameObject newObject = Instantiate(MatchingRequestDataPrefab);
 
         // �θ�� MatchingRequestData�� ����
         newObject.transform.SetParent(MatchingRequestDataParent);
 
         int index = MatchingRequestDataParent.childCount;
-        newObject.name = "MatchingRequestData_" + index;
+        //newObject.name = "MatchingRequestData_" + index;
+        newObject.name = "MatchingRequestData_" + partnerPin;       //+++ 0405
         newObject.transform.localPosition = Vector3.zero;
         newObject.transform.localScale = Vector3.one;
         newObject.transform.localRotation = Quaternion.identity;
@@ -230,7 +242,7 @@ public class HololenUIManager : MonoBehaviour
         // �ؽ�Ʈ�� ����
         Transform senderProfileImageObject = newObject.transform.Find("Data0/ProfileImageMask/ProfileImage");
         Image profileImage = senderProfileImageObject.GetComponent<Image>();
-        Sprite newSprite = Resources.Load<Sprite>(UserMatchingManager.Instance.GetPartnerUserPinNumber());
+        Sprite newSprite = Resources.Load<Sprite>(partnerPin);
         profileImage.sprite = newSprite;
 
         Transform senderNameObject = newObject.transform.Find("Data0/ProfileBaseData - V/Name");
@@ -252,8 +264,10 @@ public class HololenUIManager : MonoBehaviour
 
         MatchingRequestButton[0].OnClicked.AddListener(() =>
         {
-            RemoveMatchingRequestData(newObject);
-            hmdUIEvent.SendAcceptMessage();
+            RemoveMatchingRequestData(newObject);                                               // 수정필요
+            //hmdUIEvent.SendAcceptMessage();
+            //string partnerPin = newObject.name.Substring(newObject.name.Length - 5);
+            hmdUIEvent.SendAcceptMessage2(partnerPin);    //+++ 0405 핀번호 넘기기
             AddReservedData(); // ���濡�� ���� ��û ���� ��, UI�� ǥ��
 
             MeetingManager.Instance.meetingTimeLeftScrollSelected = 0;
@@ -266,7 +280,9 @@ public class HololenUIManager : MonoBehaviour
         MatchingRequestButton[1].OnClicked.AddListener(() =>
         {
             RemoveMatchingRequestData(newObject);
-            hmdUIEvent.SendDeclineMessage();
+            //hmdUIEvent.SendDeclineMessage();
+            string partnerPin = newObject.name.Substring(newObject.name.Length - 5);
+            hmdUIEvent.SendDeclineMessage2(partnerPin);    //+++ 0405 핀번호 넘기기
             SetTime(0);
 
             MatchingRequestButton[1].OnClicked.RemoveAllListeners();
@@ -275,6 +291,9 @@ public class HololenUIManager : MonoBehaviour
 
         MatchingRequestButton[2].OnClicked.AddListener(() =>
         {
+            //+++ 0413 TimePicker 기능 수행에서 올바른 사용자에게 송신할 수 있도록 추가 
+            UserMatchingManager.Instance.SetPartnerUserPinNumber(partnerPin);                               //+++ 0413 임시로 partner 정보를 바꾸도록 수정함 -> 더 올바른 방법으로 변경 필요
+
             // MeetTimePlus();
             MeetingManager.Instance.timePicker.parentGameObject.SetActive(true);
             RemoveMatchingRequestData(newObject);
@@ -357,6 +376,11 @@ public class HololenUIManager : MonoBehaviour
             ReservedData.RemoveAt(ReservedData.Count-1);        // ù ��° ��Ҹ� ����Ʈ���� ����
             Destroy(ReservedData[ReservedData.Count-1]);        // ������ ù ��° ����� ���� ������Ʈ�� ����
         }*/
+    }
+
+    public void RemoveReservedData2(string pinNum)
+    {
+        UserMatchingManager.Instance.matchedUserData.RemoveAll(data => data.pin == pinNum);
     }
 
 

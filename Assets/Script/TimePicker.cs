@@ -40,11 +40,15 @@ public class TimePicker : MonoBehaviour
 
     void InitializeButtons()
     {
+        string partnerPin = UserMatchingManager.Instance.GetPartnerUserPinNumber();
+
         acceptButton.OnClicked.AddListener((() =>
         {
             parentGameObject.SetActive(false);
 
-            hmdUIEvent.SendAcceptMessage();
+            //hmdUIEvent.SendAcceptMessage();
+            partnerPin = UserMatchingManager.Instance.GetPartnerUserPinNumber();
+            hmdUIEvent.SendAcceptMessage2(partnerPin);
 
             HololenUIManager.Instance.AddReservedData(); // ���濡�� ���� ��û ���� ��, UI�� ǥ��
             HololenUIManager.Instance.MeetTimeUpdate();
@@ -55,7 +59,8 @@ public class TimePicker : MonoBehaviour
         {
             parentGameObject.SetActive(false);
 
-            hmdUIEvent.SendDeclineMessage();
+            //hmdUIEvent.SendDeclineMessage();
+            hmdUIEvent.SendDeclineMessage2(partnerPin);
 
             HololenUIManager.Instance.SetTime(0);
 

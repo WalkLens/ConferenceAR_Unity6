@@ -25,6 +25,7 @@ public class UserMatchingManager : HostOnlyBehaviour
     public UserInfo myUserInfo;                             // 나의 정보
     public UserInfo partnerUserInfo = new UserInfo();       // 확인 중인 상대방의 정보
     public List<UserInfo> userInfos = new List<UserInfo>(); // 접속한 모든 유저 정보 리스트
+    public Dictionary<string, string> requestedPinPhotonNamePair = new Dictionary<string, string>(); // 요청한 사용자의 pin과 photon name 쌍
     public List<MatchedUserData> matchedUserData = new List<MatchedUserData>();// 매칭된 유저들의 남은 시간 리스트
     public DebugUserInfos debugUserInfo;
 
@@ -95,7 +96,16 @@ public class UserMatchingManager : HostOnlyBehaviour
             return "Null";
         }
     }
-    
+
+    public int SetPartnerUserPinNumber(string newPartnerPin)
+    {
+        partnerUserInfo = null;
+        partnerUserInfo = new UserInfo();
+        partnerUserInfo.PhotonUserName = newPartnerPin;
+
+        return 0;
+    }
+
     #region PhotonEventOVERRIDE
 
     public void SendMyUserInfoToMatchingMobile()
@@ -409,12 +419,27 @@ public class UserMatchingManager : HostOnlyBehaviour
 
             if (debugUserInfo.receivedMatchInfo.MatchRequest == "Request...") // 매칭 요청을 받음
             {
-                if(!myGameObject) myGameObject = FindObjectsOfType<GameObject>()
-                    .FirstOrDefault(obj => obj.name.Contains(myUserInfo.PhotonUserName));
-                
+                //Unity6부터는 문제있는 듯
+                //if(!myGameObject) myGameObject = FindObjectsOfType<GameObject>()
+                //    .FirstOrDefault(obj => obj.name.Contains(myUserInfo.PhotonUserName));
+                if (!myGameObject)
+                {
+                    myGameObject = Resources.FindObjectsOfTypeAll<GameObject>()
+                        .FirstOrDefault(obj => obj.name.Contains(myUserInfo.PhotonUserName) && obj.scene.isLoaded);
+                }
+
                 partnerUserInfo = null;
                 partnerUserInfo = new UserInfo();
                 partnerUserInfo.PhotonUserName = debugUserInfo.receivedMatchInfo.UserWhoSend;
+
+                string senderPinNumber = GetPartnerUserPinNumber();
+                if (requestedPinPhotonNamePair.ContainsKey(senderPinNumber))
+                {
+                    Debug.Log("이미 예약된 요청입니다");
+                    return;
+                }
+                requestedPinPhotonNamePair.Add(senderPinNumber, partnerUserInfo.PhotonUserName);       //+++ 0405 매칭요청 받으면 핀-게임오브젝트이름 딕셔너리로 저장
+
                 //debugUserInfo.ShowMatchRequestUI(); // 요청 받는 순간 팝업을 띄운다(ABC님께서 만남을 요청했습니다.)
                 hmdUIEvent.OpenReceiveRequestPopupUI();
                 HololenUIManager.Instance.LoadReceiveRequestDetailTextFromDB();
@@ -425,15 +450,24 @@ public class UserMatchingManager : HostOnlyBehaviour
             else if (debugUserInfo.receivedMatchInfo.MatchRequest == "Accept") // 매칭 응답(Yes)을 받음
             {
                 partnerUserInfo.PhotonUserName = receivedMatchInfo.UserWhoSend;
-                
+
                 // 매칭 성공 : myGameObject, partnerGameObject 할당
                 // 전송 받은 UserName에 부합한 홀로렌즈 혹은 퀘스트 오브젝트 찾기
-                if(!myGameObject) myGameObject = FindObjectsOfType<GameObject>()
-                    .FirstOrDefault(obj => obj.name.Contains(myUserInfo.PhotonUserName));
-                partnerGameObject = FindObjectsOfType<GameObject>()
-                    .FirstOrDefault(obj => obj.name.Contains(receivedMatchInfo.UserWhoSend));
-                
-                if(partnerGameObject != null)
+
+                //Unity6부터는 문제있는 듯
+                //if(!myGameObject) myGameObject = FindObjectsOfType<GameObject>()
+                //    .FirstOrDefault(obj => obj.name.Contains(myUserInfo.PhotonUserName));
+                //partnerGameObject = FindObjectsOfType<GameObject>()
+                //    .FirstOrDefault(obj => obj.name.Contains(receivedMatchInfo.UserWhoSend));
+                if (!myGameObject)
+                {
+                    myGameObject = Resources.FindObjectsOfTypeAll<GameObject>()
+                        .FirstOrDefault(obj => obj.name.Contains(myUserInfo.PhotonUserName) && obj.scene.isLoaded);
+                }
+                partnerGameObject = Resources.FindObjectsOfTypeAll<GameObject>()
+                    .FirstOrDefault(obj => obj.name.Contains(receivedMatchInfo.UserWhoSend) && obj.scene.isLoaded);
+
+                if (partnerGameObject != null)
                     FileLogger.Log($"파트너 게임 오브젝트 설정[Accept 받음], Target GameObject Name: {partnerGameObject.name}, UserWhoSend: {receivedMatchInfo.UserWhoSend}", this);
                 else
                     FileLogger.Log($"파트너 게임 오브젝트 찾지 못함[Accept 받음], Target GameObject Name: {receivedMatchInfo.UserWhoSend}", this);
@@ -474,7 +508,8 @@ public class UserMatchingManager : HostOnlyBehaviour
                 HololenUIManager.Instance.AddReservedData();
                 //HololenUIManager.Instance.timers["12345"] = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime) * 60; // 분 단위에서 초 단위로 변경
                 HololenUIManager.Instance.LoadReservatedDataFromDB();
-                
+
+                // 만나기로 됨
                 MatchedUserData temp;
                 temp.pin = GetPartnerUserPinNumber();
                 temp.time = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime) * 60;

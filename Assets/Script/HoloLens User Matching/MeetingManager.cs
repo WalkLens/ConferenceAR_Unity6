@@ -17,6 +17,7 @@ public class MeetingManager : MonoBehaviour
 
     [Header("Meeting Info(Input)")] public float meetingTimeLeftScrollSelected;
     public TimePicker timePicker;
+    public string partnerPin;
 
     private void Awake()
     {
