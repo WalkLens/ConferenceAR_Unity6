@@ -10,9 +10,15 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
-public struct MatchedUserData
+public struct MatchingData
 {
-    public string pin;
+    public string partnerPin;
+}
+
+
+public struct MeetingData
+{
+    public string partnerPin;
     public float time;
 }
 
@@ -20,14 +26,17 @@ public struct MatchedUserData
 public class UserMatchingManager : HostOnlyBehaviour
 {
     public static UserMatchingManager Instance;
+    public DebugUserInfos debugUserInfo;
     public HmdUIEvent hmdUIEvent;
+
     public string myPin;
     public UserInfo myUserInfo;                             // 나의 정보
     public UserInfo partnerUserInfo = new UserInfo();       // 확인 중인 상대방의 정보
     public List<UserInfo> userInfos = new List<UserInfo>(); // 접속한 모든 유저 정보 리스트
     public Dictionary<string, string> requestedPinPhotonNamePair = new Dictionary<string, string>(); // 요청한 사용자의 pin과 photon name 쌍
-    public List<MatchedUserData> matchedUserData = new List<MatchedUserData>();// 매칭된 유저들의 남은 시간 리스트
-    public DebugUserInfos debugUserInfo;
+
+    public List<MatchingData> waitingMatchingContainer = new List<MatchingData>();// 매칭 대기하는 유저들의 정보 리스트
+    public List<MeetingData> reservedMeetingContainer = new List<MeetingData>();// 매칭되어 미팅을 기다리는 유저들의 정보 리스트
 
     private Dictionary<byte, Action<EventData>> eventHandlers;
     public const byte RenameEvent = 1; // 유저 이름 변경 이벤트 코드
@@ -93,7 +102,7 @@ public class UserMatchingManager : HostOnlyBehaviour
         }
         else
         {
-            return "Null";
+            return "";
         }
     }
 
@@ -510,10 +519,10 @@ public class UserMatchingManager : HostOnlyBehaviour
                 HololenUIManager.Instance.LoadReservatedDataFromDB();
 
                 // 만나기로 됨
-                MatchedUserData temp;
-                temp.pin = GetPartnerUserPinNumber();
+                MeetingData temp;
+                temp.partnerPin = GetPartnerUserPinNumber();
                 temp.time = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime) * 60;
-                matchedUserData.Add(temp);
+                reservedMeetingContainer.Add(temp);
             }
             else
             {

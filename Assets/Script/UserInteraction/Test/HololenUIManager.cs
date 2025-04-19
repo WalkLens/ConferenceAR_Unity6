@@ -91,10 +91,10 @@ public class HololenUIManager : MonoBehaviour
         // DB ����
         if (isTimerUpdated)
         {
-            MatchedUserData temp;
-            temp.pin = UserMatchingManager.Instance.GetPartnerUserPinNumber();
+            MeetingData temp;
+            temp.partnerPin = UserMatchingManager.Instance.GetPartnerUserPinNumber();
             temp.time = (float)GetTime();
-            UserMatchingManager.Instance.matchedUserData.Add(temp);
+            UserMatchingManager.Instance.reservedMeetingContainer.Add(temp);
 
             //timers[UserMatchingManager.Instance.GetPartnerUserPinNumber()] = (float)GetTime();
             LoadReservatedDataFromDB();
@@ -148,9 +148,9 @@ public class HololenUIManager : MonoBehaviour
     {
         //List<string> keys = new List<string>(timers.Keys); // ����� �����鿡 ���ؼ� Ÿ�̸� �۵�
 
-        for(int i=0; i < UserMatchingManager.Instance.matchedUserData.Count; i++ )
+        for(int i=0; i < UserMatchingManager.Instance.reservedMeetingContainer.Count; i++ )
         {
-            var data = UserMatchingManager.Instance.matchedUserData[i];
+            var data = UserMatchingManager.Instance.reservedMeetingContainer[i];
 
             if (data.time >= 3600)
             {
@@ -162,7 +162,7 @@ public class HololenUIManager : MonoBehaviour
                         .ToString("hh:mm tt"); // !!! ��� ������ �ʿ� �����Ƿ� ���Ŀ� ������ ������
                 ReservatedDataCircleTimer.fillAmount = data.time / (4 * 60 * 60);
 
-                UserMatchingManager.Instance.matchedUserData[i] = data;
+                UserMatchingManager.Instance.reservedMeetingContainer[i] = data;
             }
             else if (data.time >= 60)
             {
@@ -173,7 +173,7 @@ public class HololenUIManager : MonoBehaviour
                         .ToString("hh:mm tt"); // !!! ��� ������ �ʿ� �����Ƿ� ���Ŀ� ������ ������
                 ReservatedDataCircleTimer.fillAmount = data.time / (4 * 60 * 60);
 
-                UserMatchingManager.Instance.matchedUserData[i] = data;
+                UserMatchingManager.Instance.reservedMeetingContainer[i] = data;
             }
             else if (data.time >= 0)
             {
@@ -184,7 +184,7 @@ public class HololenUIManager : MonoBehaviour
                         .ToString("hh:mm tt"); // !!! ��� ������ �ʿ� �����Ƿ� ���Ŀ� ������ ������
                 ReservatedDataCircleTimer.fillAmount = data.time / (4 * 60 * 60);
 
-                UserMatchingManager.Instance.matchedUserData[i] = data;
+                UserMatchingManager.Instance.reservedMeetingContainer[i] = data;
             }
             else
             {
@@ -193,7 +193,7 @@ public class HololenUIManager : MonoBehaviour
                     data.time = -1; // 한번만 작동하도록
                     hmdUIEvent.OpenMatchingStartPopupUI();
                     //RemoveReservedData();
-                    RemoveReservedData2(data.pin);
+                    RemoveReservedData2(data.partnerPin);
                 }
 
                 ReservatedDataText[1].text =
@@ -201,7 +201,7 @@ public class HololenUIManager : MonoBehaviour
                         .ToString("hh:mm tt"); // !!! ��� ������ �ʿ� �����Ƿ� ���Ŀ� ������ ������
                 ReservatedDataCircleTimer.fillAmount = data.time / (4 * 60 * 60);
 
-                UserMatchingManager.Instance.matchedUserData[i] = data;
+                UserMatchingManager.Instance.reservedMeetingContainer[i] = data;
             }
         }
     }
@@ -380,7 +380,7 @@ public class HololenUIManager : MonoBehaviour
 
     public void RemoveReservedData2(string pinNum)
     {
-        UserMatchingManager.Instance.matchedUserData.RemoveAll(data => data.pin == pinNum);
+        UserMatchingManager.Instance.reservedMeetingContainer.RemoveAll(data => data.partnerPin == pinNum);
     }
 
 
