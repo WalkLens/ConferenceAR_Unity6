@@ -48,9 +48,9 @@ public class TimePicker : MonoBehaviour
 
             //hmdUIEvent.SendAcceptMessage();
             partnerPin = UserMatchingManager.Instance.GetPartnerUserPinNumber();
-            hmdUIEvent.SendAcceptMessage2(partnerPin);
+            //hmdUIEvent.SendAcceptMessage2(partnerPin);
 
-            HololenUIManager.Instance.AddReservedData(); // ���濡�� ���� ��û ���� ��, UI�� ǥ��
+            HololenUIManager.Instance.AddReservedMeetingData(partnerPin); // ���濡�� ���� ��û ���� ��, UI�� ǥ��
             HololenUIManager.Instance.MeetTimeUpdate();
 
             UserMatchingManager.Instance.MatchingStateUpdateAsTrue();

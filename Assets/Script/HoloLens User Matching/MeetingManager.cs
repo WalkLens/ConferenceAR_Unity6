@@ -128,8 +128,7 @@ public class MeetingManager : MonoBehaviour
         meetingTimeLeftScrollSelected = 0;
 
         // 전송 (pin + hololens)
-        UserMatchingManager.Instance.SendMeetingInfo(newMeetingInfo,
-            PhotonUserUtility.GetPlayerActorNumber(targetUserName));
+        UserMatchingManager.Instance.SendMeetingInfo(newMeetingInfo, PhotonUserUtility.GetPlayerActorNumber(targetUserName));
     }
 
     #endregion

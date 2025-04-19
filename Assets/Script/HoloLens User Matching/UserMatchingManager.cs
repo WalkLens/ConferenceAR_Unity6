@@ -10,18 +10,6 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
-public struct MatchingData
-{
-    public string partnerPin;
-}
-
-
-public struct MeetingData
-{
-    public string partnerPin;
-    public float time;
-}
-
 
 public class UserMatchingManager : HostOnlyBehaviour
 {
@@ -453,7 +441,7 @@ public class UserMatchingManager : HostOnlyBehaviour
                 hmdUIEvent.OpenReceiveRequestPopupUI();
                 HololenUIManager.Instance.LoadReceiveRequestDetailTextFromDB();
                 HololenUIManager.Instance.LoadReceiveRequestPopupTextFromDB();
-                HololenUIManager.Instance.AddMatchingRequestData();
+                HololenUIManager.Instance.AddWaitingMatchingData();
                 HololenUIManager.Instance.LoadMatchingSenderDataFromDB();
             }
             else if (debugUserInfo.receivedMatchInfo.MatchRequest == "Accept") // 매칭 응답(Yes)을 받음
@@ -484,9 +472,11 @@ public class UserMatchingManager : HostOnlyBehaviour
                 //debugUserInfo.ShowReceiveAcceptUI();
                 hmdUIEvent.OpenReceiveAcceptPopupUI();
                 HololenUIManager.Instance.LoadReceiveAcceptPopupTextFromDB();
+
                 // TODO : (수민님 이거 구현해야 하는 부분인가요?(From 정효))
                 // TODO : 여기에 HoloenUIManager.cs로 부터 함수를 가져와 매칭에 대한 이력을 띄워야함
-                
+                HololenUIManager.Instance.AddReservedMeetingData(GetPartnerUserPinNumber());
+
                 MatchingStateUpdateAsTrue();
             }
             else if (debugUserInfo.receivedMatchInfo.MatchRequest == "Decline") // 매칭 응답(No)을 받음
@@ -506,7 +496,7 @@ public class UserMatchingManager : HostOnlyBehaviour
             FileLogger.Log($"Meeting confirmed for: {meetingInfo.MeetingDateTime}", this);
             Debug.Log("Match Key: " + meetingInfo.MatchKey);
             Debug.Log("Meeting Time: " + meetingInfo.MeetingDateTime);
-            hmdUIEvent.ShowMeetingUI();
+            //hmdUIEvent.ShowMeetingUI();
             isTravelingToMeet = true;
             
             // MeetingInfo를 받고 알람을 시작한다.
@@ -514,15 +504,17 @@ public class UserMatchingManager : HostOnlyBehaviour
             {
                 MeetingManager.Instance.AddAlarmFromMeetingInfo(meetingInfo);
 
-                HololenUIManager.Instance.AddReservedData();
-                //HololenUIManager.Instance.timers["12345"] = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime) * 60; // 분 단위에서 초 단위로 변경
-                HololenUIManager.Instance.LoadReservatedDataFromDB();
+                string partnerPin = GetPartnerUserPinNumber();
 
                 // 만나기로 됨
-                MeetingData temp;
-                temp.partnerPin = GetPartnerUserPinNumber();
-                temp.time = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime) * 60;
-                reservedMeetingContainer.Add(temp);
+                //MeetingData temp;
+                //temp.partnerPin = partnerPin;
+                MeetingManager.Instance.meetingTimeLeftScrollSelected = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime) * 60;
+                //reservedMeetingContainer.Add(temp);                                                         // 데이터 정보 추가
+
+                HololenUIManager.Instance.AddReservedMeetingData(partnerPin);
+                //HololenUIManager.Instance.timers["12345"] = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime) * 60; // 분 단위에서 초 단위로 변경
+                HololenUIManager.Instance.LoadReservatedDataFromDB();
             }
             else
             {
