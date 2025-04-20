@@ -69,15 +69,25 @@ public class MeetingManager : MonoBehaviour
 
         // 매칭 성공 : myGameObject, partnerGameObject 할당
         // 전송 받은 UserName에 부합한 홀로렌즈 혹은 퀘스트 오브젝트 찾기
-        if (!UserMatchingManager.Instance.myGameObject)
-            UserMatchingManager.Instance.myGameObject = FindObjectsOfType<GameObject>()
-                .FirstOrDefault(obj => obj.name.Contains(UserMatchingManager.Instance.myUserInfo.PhotonUserName));
+        // 여기서 이상한 값으로 바뀌어서 우선 주석처리 함
+        // Unity5
+        //if (!UserMatchingManager.Instance.myGameObject)
+        //    UserMatchingManager.Instance.myGameObject = FindObjectsOfType<GameObject>()
+        //        .FirstOrDefault(obj => obj.name.Contains(UserMatchingManager.Instance.myUserInfo.PhotonUserName));
+        // Unity6
+        //if (!UserMatchingManager.Instance.myGameObject)
+        //{
+        //    UserMatchingManager.Instance.myGameObject = Resources.FindObjectsOfTypeAll<GameObject>()
+        //        .FirstOrDefault(obj => obj.name.Contains(UserMatchingManager.Instance.myUserInfo.PhotonUserName) && obj.scene.isLoaded);
+        //}
 
         // MeetingInfo에서 targetUserName 추출하기
         string targetUserName =
             MatchingUtils.ExtractOtherUser(matchKey, UserMatchingManager.Instance.myGameObject.name);
-        UserMatchingManager.Instance.partnerGameObject = FindObjectsOfType<GameObject>()
-            .FirstOrDefault(obj => obj.name.Contains(targetUserName));
+        //UserMatchingManager.Instance.partnerGameObject = FindObjectsOfType<GameObject>()
+        //    .FirstOrDefault(obj => obj.name.Contains(targetUserName));
+        UserMatchingManager.Instance.partnerGameObject
+            = Resources.FindObjectsOfTypeAll<GameObject>().FirstOrDefault(obj => obj.name.Contains(targetUserName) && obj.scene.isLoaded);
 
         if (UserMatchingManager.Instance.partnerGameObject != null)
             FileLogger.Log(

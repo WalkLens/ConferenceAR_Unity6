@@ -347,7 +347,7 @@ public class HololenUIManager : MonoBehaviour
         // 1) 상대방 기본 정보를 받음
         MeetingData newMeetingData;
         newMeetingData.partnerPin = partnerPin;
-        newMeetingData.time = MeetingManager.Instance.meetingTimeLeftScrollSelected;
+        newMeetingData.time = MeetingManager.Instance.meetingTimeLeftScrollSelected * 60;       // UI상의 분 단위에서, 데이터 처리용의 초 단위로
         UserMatchingManager.Instance.reservedMeetingContainer.Add(newMeetingData);
 
         // 2) 시각화 (UI 컨테이너에 담음)

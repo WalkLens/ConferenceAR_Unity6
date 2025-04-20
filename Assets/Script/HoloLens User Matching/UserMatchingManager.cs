@@ -509,7 +509,7 @@ public class UserMatchingManager : HostOnlyBehaviour
                 // 만나기로 됨
                 //MeetingData temp;
                 //temp.partnerPin = partnerPin;
-                MeetingManager.Instance.meetingTimeLeftScrollSelected = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime) * 60;
+                MeetingManager.Instance.meetingTimeLeftScrollSelected = (float)MatchingUtils.GetRemainingMinutes(meetingInfo.MeetingDateTime);
                 //reservedMeetingContainer.Add(temp);                                                         // 데이터 정보 추가
 
                 HololenUIManager.Instance.AddReservedMeetingData(partnerPin);
@@ -826,10 +826,10 @@ public class UserMatchingManager : HostOnlyBehaviour
         _isLoopRunning = true;
         Debug.Log("Start Traveling");
         string partnerPinNum = partnerGameObject.name[..5];
-        StartCoroutine(ShowCommonInterests(partnerPinNum));
+        //StartCoroutine(ShowCommonInterests(partnerPinNum));               // 디버깅을 위해 잠시 주석
         while (_isTravelingToMeet && _isLoopRunning)
         {
-            Vector3 temp = myGameObject.transform.position - partnerGameObject.transform.position;
+            Vector3 temp = myGameObject.transform.position - partnerGameObject.transform.position;      // 0420: 이상하게 Parner가 SolverHandler라는 애로 바뀜
             hmdUIEvent.UpdateRouteVisualizationUI(temp, myGameObject.transform.rotation.eulerAngles.y);
             await Task.Delay(500); // 1초 대기
 
