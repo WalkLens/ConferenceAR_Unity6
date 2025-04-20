@@ -46,12 +46,12 @@ public class TimePicker : MonoBehaviour
         {
             parentGameObject.SetActive(false);
 
-            //hmdUIEvent.SendAcceptMessage();
             partnerPin = UserMatchingManager.Instance.GetPartnerUserPinNumber();
-            //hmdUIEvent.SendAcceptMessage2(partnerPin);
+            //hmdUIEvent.SendAcceptMessage();
+            hmdUIEvent.SendAcceptMessage2(partnerPin);                              // 상대방에게 "수락요청" 보냄
 
-            HololenUIManager.Instance.AddReservedMeetingData(partnerPin); // ���濡�� ���� ��û ���� ��, UI�� ǥ��
-            HololenUIManager.Instance.MeetTimeUpdate();
+            HololenUIManager.Instance.AddReservedMeetingData(partnerPin);           // 1. WaitingMatching - Aceept 송신
+            HololenUIManager.Instance.MeetTimeUpdate();                             // 2. ReservedMeeting - 시간 값 송신 및 초기화
 
             UserMatchingManager.Instance.MatchingStateUpdateAsTrue();
         }));

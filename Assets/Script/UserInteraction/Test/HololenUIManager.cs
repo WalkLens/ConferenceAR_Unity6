@@ -267,12 +267,12 @@ public class HololenUIManager : MonoBehaviour
         // 0 - 즉시 매칭 버튼
         MatchingRequestButton[0].OnClicked.AddListener(() =>
         {
-            hmdUIEvent.SendAcceptMessage2(partnerPin);                                      // 상대방에게 "즉시 수락요청 보냄"
+            hmdUIEvent.SendAcceptMessage2(partnerPin);                                      // 상대방에게 "수락요청" 보냄
 
             // 1) ReservedMeeting 요소 추가
-            MeetingManager.Instance.meetingTimeLeftScrollSelected = 0;
-            AddReservedMeetingData(partnerPin);
-            MeetTimeUpdate();
+            AddReservedMeetingData(partnerPin);                                             // 1. WaitingMatching - Aceept 송신
+            MeetingManager.Instance.meetingTimeLeftScrollSelected = 0;                      // 즉시 수락이므로 time=0도 송신
+            MeetTimeUpdate();                                                               // 2. ReservedMeeting - 시간 값 송신 및 초기화
 
             // 2) WaitingMatching 요소 삭제
             RemoveMatchingRequestData(newObject);                                           // UI 오브젝트를 삭제
@@ -307,8 +307,8 @@ public class HololenUIManager : MonoBehaviour
 
             // 1) ReservedMeeting 요소 추가
             //+++ 0413 TimePicker 기능 수행에서 올바른 사용자에게 송신할 수 있도록 추가 
-            UserMatchingManager.Instance.SetPartnerUserPinNumber(partnerPin);          //+++ 0413 임시로 partner 정보를 바꾸도록 수정함 -> 더 올바른 방법으로 변경 필요
-            MeetingManager.Instance.timePicker.parentGameObject.SetActive(true);
+            UserMatchingManager.Instance.SetPartnerUserPinNumber(partnerPin);           //+++ 0413 임시로 partner 정보를 바꾸도록 수정함 -> 더 올바른 방법으로 변경 필요
+            MeetingManager.Instance.timePicker.parentGameObject.SetActive(true);        // 새로 열린 팝업을 통해 Meeting 정보, UI 업뎃해야함
 
             // 2) WaitingMatching 요소 삭제
             RemoveMatchingRequestData(newObject);

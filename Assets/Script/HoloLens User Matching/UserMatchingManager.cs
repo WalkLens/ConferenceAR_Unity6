@@ -473,10 +473,6 @@ public class UserMatchingManager : HostOnlyBehaviour
                 hmdUIEvent.OpenReceiveAcceptPopupUI();
                 HololenUIManager.Instance.LoadReceiveAcceptPopupTextFromDB();
 
-                // TODO : (수민님 이거 구현해야 하는 부분인가요?(From 정효))
-                // TODO : 여기에 HoloenUIManager.cs로 부터 함수를 가져와 매칭에 대한 이력을 띄워야함
-                HololenUIManager.Instance.AddReservedMeetingData(GetPartnerUserPinNumber());
-
                 MatchingStateUpdateAsTrue();
             }
             else if (debugUserInfo.receivedMatchInfo.MatchRequest == "Decline") // 매칭 응답(No)을 받음
@@ -503,6 +499,10 @@ public class UserMatchingManager : HostOnlyBehaviour
             if (MeetingManager.Instance && (PhotonNetwork.NickName.Contains("hololens") || PhotonNetwork.NickName.Contains("Quest")))
             {
                 MeetingManager.Instance.AddAlarmFromMeetingInfo(meetingInfo);
+
+                //partnerUserInfo = null;
+                //partnerUserInfo = new UserInfo();
+                //partnerUserInfo.PhotonUserName = debugUserInfo.receivedMatchInfo.UserWhoSend;
 
                 string partnerPin = GetPartnerUserPinNumber();
 
